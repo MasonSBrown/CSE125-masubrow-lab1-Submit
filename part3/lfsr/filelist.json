@@ -1,0 +1,9 @@
+{
+    "top": "lfsr",
+    "_comment": "You may add other modules that you create",
+    "files":
+    ["part3/lfsr/lfsr.sv",
+     "provided/nand2.sv",
+     "provided/dff.sv"
+    ]
+}

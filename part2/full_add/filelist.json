@@ -1,0 +1,8 @@
+{
+    "top": "full_add",
+    "_comment": "You may add other modules that you create",
+    "files":
+    ["part2/full_add/full_add.sv",
+     "provided/nand2.sv"
+    ]
+}
