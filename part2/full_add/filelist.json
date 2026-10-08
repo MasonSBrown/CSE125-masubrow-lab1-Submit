@@ -3,6 +3,8 @@
     "_comment": "You may add other modules that you create",
     "files":
     ["part2/full_add/full_add.sv",
+     "part2/half_add/half_add.sv",
+     "part2/xor2/xor2.sv",
      "provided/nand2.sv"
     ]
 }

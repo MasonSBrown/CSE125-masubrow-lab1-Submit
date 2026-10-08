@@ -16,7 +16,7 @@ module top
    // to drive the output wires of led_o. You may only use structural
    // verilog, the modules in provided_modules, and your lfsr module,
    // and your counter.
-   // 
+   //
    // Hint: A 12 MHz clock is _very fast_ for human consumption. You
    // should use your counter to slow down your LFSR by generating a
    // new clock. In our solution, about 22 bits is sufficent.
@@ -27,33 +27,31 @@ module top
    wire [0:0] reset_n_sync_r;
    wire [0:0] reset_sync_r;
    wire [0:0] reset_r; // Use this as your reset_signal
-   dff
-     #()
-   sync_a
+
+
+    // sample asynch reset
+   dff sync_a
      (.clk_i(clk_12mhz_i)
      ,.reset_i(1'b0)
      ,.en_i(1'b1)
      ,.d_i(reset_n_async_unsafe_i)
      ,.q_o(reset_n_sync_r));
 
-   inv
-     #()
-   inv
+    //convert active-low to active-high reset
+   inv invert_sync_reset
      (.x_i(reset_n_sync_r)
      ,.y_o(reset_sync_r));
 
-   dff
-     #()
-   sync_b
+    // second stage of reset
+   dff sync_b
      (.clk_i(clk_12mhz_i)
      ,.reset_i(1'b0)
      ,.en_i(1'b1)
      ,.d_i(reset_sync_r)
      ,.q_o(reset_r));
-       
-   lfsr
-     #()
-   lfsr_i
+
+    // highest counter bit enables updates to the LFSR state
+   lfsr lfsr_i
      (.clk_i(clk_12mhz_i)
      ,.reset_i(reset_r)
      ,.data_o(led_o[5:1]));

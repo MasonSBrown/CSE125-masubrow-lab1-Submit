@@ -14,7 +14,7 @@ module top
    // drive the output wires of ssd_o. You may only use structural
    // verilog, the modules in provided_modules, and your lfsr module,
    // and your counter.
-   // 
+   //
    // Hint: A 12 MHz clock is _very fast_ for human consumption. You
    // should use your counter to slow down your LFSR by generating a
    // new clock. In our solution, about 22 bits is sufficent.
@@ -37,8 +37,8 @@ module top
    inv
      #()
    inv
-     (.a_i(reset_n_sync_r)
-     ,.b_o(reset_sync_r));
+     (.x_i(reset_n_sync_r)
+     ,.y_o(reset_sync_r));
 
    dff
      #()
@@ -48,7 +48,35 @@ module top
      ,.en_i(1'b1)
      ,.d_i(reset_sync_r)
      ,.q_o(reset_r));
-       
+
   // Your code goes here
+  wire [23:0] tick_count;
+  wire [12:0] unused_scan_count;
+  wire [10:5] lfsr_upper;
+  wire [3:0]  display_hex;
+  wire tick_n, tick, reset_n, timer_reset;
+  wire [1:0] startup;
+  wire lfsr_enable;
+
+
+  //advance on next edge
+  counter #(.width_p(24)) timer (.clk_i(clk_12mhz_i), .reset_i(timer_reset),  .up_i(1'b1), .down_i(1'b0), .count_o(tick_count));
+  nand2 detect_tick (.a_i(tick_count[23]),  .b_i(tick_count[22]),  .c_o(tick_n));
+  inv invert_tick (.x_i(tick_n), .y_o(tick));
+  inv invert_reset (.x_i(reset_r), .y_o(reset_n));
+  nand2 reset_timer (.a_i(reset_n), .b_i(tick_n), .c_o(timer_reset));
+
+
+  // advance twice after reset, then use the timer
+  shift #(.depth_p(2), .reset_val_p(2'b11)) startup_steps (.clk_i(clk_12mhz_i), .reset_i(reset_r), .data_i(1'b0), .enable_i(1'b1), .data_o(startup));
+
+  mux2 enable_select (.a_i(tick), .b_i(1'b1), .select_i(startup[1]), .c_o(lfsr_enable));
+
+  lfsr sequence_generator (.clk_i(clk_12mhz_i),  .reset_i(reset_r), .en_i(lfsr_enable),  .data_o({lfsr_upper, led_o}));
+  counter #(.width_p(14)) scanner (.clk_i(clk_12mhz_i), .reset_i(reset_r), .up_i(1'b1), .down_i(1'b0), .count_o({ssd_o[7], unused_scan_count}));
+
+  mux2 digits [3:0] (.a_i(lfsr_upper[10:7]),  .b_i({lfsr_upper[6:5], led_o[5:4]}), .select_i(ssd_o[7]), .c_o(display_hex));
+  hex2ssd decoder (.hex_i(display_hex), .ssd_o(ssd_o[6:0]));
+
 
 endmodule

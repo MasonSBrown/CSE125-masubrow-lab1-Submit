@@ -16,5 +16,14 @@ module top
   // btn_async_unsafe_i, drive an output wire in led_o.
   //
   // Your code goes here:
+  xor2 button_xor
+  (.a_i(button_async_unsafe_i[1]) ,.b_i(button_async_unsafe_i[2]) ,.c_o(led_o[1]));
+
+
+  for (genvar i = 2; i <= 5; i++) begin : gen_unused_led
+    nand2 led_off
+      (.a_i(1'b1), .b_i(1'b1), .c_o(led_o[i]));
+  end
+
 
 endmodule
